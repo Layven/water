@@ -14,10 +14,10 @@ namespace Water {
         struct UniformData {
             public Matrix worldViewProj;
             public float time;
-            public float speed;
-            public float wavelength;
-            public float amplitude;
-            public Vector4 waveDir;
+            public float[] speed;
+            public float[] wavelength;
+            public float[] amplitude;
+            public Vector4[] waveDir;
             
         }
 
@@ -108,9 +108,10 @@ namespace Water {
 
 
                     float time = Environment.TickCount / 1000.0F;
-                    float speed = water.wave.speed;
-                    float wavelength = water.wave.wavelenght;
-                    float amplitude = water.wave.amplitude;
+                    float[] speed = new float[2]{ water.wave.speed, water.wave.speed};
+                    float[] wavelength = new float[2]{ water.wave.wavelenght, water.wave.wavelenght};
+                    float[] amplitude = new float[2]{water.wave.amplitude, water.wave.amplitude};
+                    Vector4[] waveDir = new Vector4[2]{water.wave.waveDir, -water.wave.waveDir};
 
                     UniformData sceneInfo = new UniformData() {
                         worldViewProj = WVP,
@@ -118,7 +119,7 @@ namespace Water {
                         speed = speed,
                         wavelength = wavelength,
                         amplitude = amplitude,
-                        waveDir = water.wave.waveDir
+                        waveDir = waveDir
                     };
 
                     //update constant buffer
