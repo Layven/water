@@ -101,7 +101,7 @@ namespace Water {
                     //Set matrices
                     float ratio = (float) form.ClientRectangle.Width / (float) form.ClientRectangle.Height;
                     Matrix projection = Matrix.PerspectiveFovLH(3.14F / 3.0F, ratio, 1, 1000);
-                    Matrix view = Matrix.LookAtLH(new Vector3(0, 7, -10), new Vector3(), Vector3.UnitY);
+                    Matrix view = Matrix.LookAtLH(new Vector3(0, 12, -12), new Vector3(), Vector3.UnitY);
                     Matrix world = Matrix.RotationY(Environment.TickCount / 1000.0F * 0.1f);
                     world = Matrix.Identity;
                     Matrix WVP = world * view * projection;

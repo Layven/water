@@ -4,8 +4,8 @@ cbuffer data :register(b0)
 	float4x4 worldViewProj;
 	float time;
 	float speed;
-    float wavelength;
-    float amplitude;
+	float wavelength;
+	float amplitude;
 	float4 waveDir;
 };
 
@@ -28,9 +28,17 @@ PS_IN VS( VS_IN input)
 	float4 pos = input.position;
 	
 	float dist = dot(pos,waveDir);
-	float phase = 2.0*3.1415*(dist + speed*time)/wavelength;
+	//float dist = pos.x;
+	float phase = (dist + speed*time)/wavelength;
 
-	pos.y = pos.y + amplitude*sin(phase);
+	//pos.y = pos.y + amplitude*sin(phase);
+
+	float offsetX = amplitude*-cos(phase);
+	float offsetY = amplitude*-sin(phase);
+
+	pos += offsetX*waveDir;
+	pos += float4(0, offsetY, 0 ,0);
+	
 	pos = mul(worldViewProj,pos);
 
 	output.position = pos;

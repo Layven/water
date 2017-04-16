@@ -14,11 +14,11 @@ namespace Water {
         //Indices
         private int[] indices;
 
-        private int N = 10, M = 10;
-        private Vector3 botLeftCorner = new Vector3(-5.0f, -2.0f, -5.0f);
-        private float size = 10;
+        private int N = 100, M = 100;
+        private Vector3 botLeftCorner = new Vector3(-10.0f, -2.0f, -6.0f);
+        private float size = 20;
 
-        public Wave wave = new Wave(5.0f,1.0f);
+        public Wave wave = new Wave(2.0f,1.0f);
 
         //Vertices
         private ColoredVertex[] vertices;
@@ -81,7 +81,7 @@ namespace Water {
             this.wavelenght = wavelength;
             this.amplitude = amplitude;
             speed = (float) Math.Sqrt(gravity*wavelength/(2.0*Math.PI));
-            waveDir = new Vector4(2.0f,0.0f,4.0f, 0.0f);
+            waveDir = new Vector4(2.0f,0.0f,-1.0f, 0.0f);
             waveDir.Normalize();
         }
 
