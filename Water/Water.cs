@@ -8,15 +8,17 @@ using SharpDX;
 using SharpHelper;
 
 namespace Water {
+
     public class Water : IDisposable {
 
         //Indices
         private int[] indices;
 
-        private int N = 50, M = 50;
+        private int N = 10, M = 10;
         private Vector3 botLeftCorner = new Vector3(-5.0f, -2.0f, -5.0f);
         private float size = 10;
 
+        public Wave wave = new Wave(5.0f,1.0f);
 
         //Vertices
         private ColoredVertex[] vertices;
@@ -34,12 +36,7 @@ namespace Water {
                     );
                 }
             }
-
-            foreach (ColoredVertex v in vertices) {
-                //Console.Out.WriteLine(v.Position);
-            }
-
-
+            
             indices = new int[6 * (N - 1) * (M - 1)];
             for (int i = 0; i < M - 1; i++) {
                 for (int j = 0; j < N - 1; j++) {
@@ -64,9 +61,8 @@ namespace Water {
             return mesh;
         }
         
-
         public void Draw() {
-            mesh?.Draw();
+            mesh.Draw();
         }
 
         public void Dispose() {
@@ -74,6 +70,21 @@ namespace Water {
         }
     }
 
+    public class Wave {
+        public float speed;
+        public float wavelenght;
+        public float amplitude;
+        public Vector4 waveDir;
+        public float gravity = 9.81f;
+
+        public Wave(float wavelength, float amplitude) {
+            this.wavelenght = wavelength;
+            this.amplitude = amplitude;
+            speed = (float) Math.Sqrt(gravity*wavelength/(2.0*Math.PI));
+            waveDir = new Vector4(2.0f,0.0f,4.0f, 0.0f);
+            waveDir.Normalize();
+        }
 
 
+    }
 }

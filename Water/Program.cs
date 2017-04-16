@@ -4,6 +4,7 @@ using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Windows;
 using SharpHelper;
+using System.Windows.Forms;
 
 using Buffer11 = SharpDX.Direct3D11.Buffer;
 
@@ -12,6 +13,12 @@ namespace Water {
 
         struct UniformData {
             public Matrix worldViewProj;
+            public float time;
+            public float speed;
+            public float wavelength;
+            public float amplitude;
+            public Vector4 waveDir;
+            
         }
 
         static void Main(string[] args) {
@@ -46,6 +53,35 @@ namespace Water {
 
                 fpsCounter.Reset();
 
+                form.KeyDown += (sender, e) =>
+                {
+                    switch (e.KeyCode)
+                    {
+                        case Keys.W:
+                            device.SetWireframeRasterState();
+                            device.SetDefaultBlendState();
+                            break;
+                        case Keys.S:
+                            device.SetDefaultRasterState();
+                            break;
+                        case Keys.D1:
+                            device.SetDefaultBlendState();
+                            break;
+                        case Keys.D2:
+                            device.SetBlend(BlendOperation.Add, BlendOption.InverseSourceAlpha, BlendOption.SourceAlpha);
+                            break;
+                        case Keys.D3:
+                            device.SetBlend(BlendOperation.Add, BlendOption.SourceAlpha, BlendOption.InverseSourceAlpha);
+                            break;
+                        case Keys.D4:
+                            device.SetBlend(BlendOperation.Add, BlendOption.SourceColor, BlendOption.InverseSourceColor);
+                            break;
+                        case Keys.D5:
+                            device.SetBlend(BlendOperation.Add, BlendOption.SourceColor, BlendOption.DestinationColor);
+                            break;
+                    }
+                };
+
                 //main loop
                 RenderLoop.Run(form, () => {
                     //Resizing
@@ -65,15 +101,24 @@ namespace Water {
                     //Set matrices
                     float ratio = (float) form.ClientRectangle.Width / (float) form.ClientRectangle.Height;
                     Matrix projection = Matrix.PerspectiveFovLH(3.14F / 3.0F, ratio, 1, 1000);
-                    Matrix view = Matrix.LookAtLH(new Vector3(0, 4, -10), new Vector3(), Vector3.UnitY);
-                    Matrix world = Matrix.RotationX(Environment.TickCount / 1000.0F);
+                    Matrix view = Matrix.LookAtLH(new Vector3(0, 7, -10), new Vector3(), Vector3.UnitY);
+                    Matrix world = Matrix.RotationY(Environment.TickCount / 1000.0F * 0.1f);
                     world = Matrix.Identity;
                     Matrix WVP = world * view * projection;
 
-                    Vector3 phase = new Vector3(Environment.TickCount / 1000.0F, 0, 0);
+
+                    float time = Environment.TickCount / 1000.0F;
+                    float speed = water.wave.speed;
+                    float wavelength = water.wave.wavelenght;
+                    float amplitude = water.wave.amplitude;
 
                     UniformData sceneInfo = new UniformData() {
-                        worldViewProj = WVP
+                        worldViewProj = WVP,
+                        time = time,
+                        speed = speed,
+                        wavelength = wavelength,
+                        amplitude = amplitude,
+                        waveDir = water.wave.waveDir
                     };
 
                     //update constant buffer
