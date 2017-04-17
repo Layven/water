@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -11,14 +12,23 @@ using Buffer11 = SharpDX.Direct3D11.Buffer;
 namespace Water {
     class Program {
 
+        private const int count = 2;
+        [StructLayout(LayoutKind.Explicit,Size = 128)]
         struct UniformData {
+            [FieldOffset(0)]
             public Matrix worldViewProj;
+            [FieldOffset(64)]
             public float time;
+            [FieldOffset(68)]
             public float speed;
+            [FieldOffset(72)]
             public float wavelength;
+            [FieldOffset(76)]
             public float amplitude;
+            [FieldOffset(80)]
             public Vector4 waveDir;
-            
+            [FieldOffset(96), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
+            public Vector4[] array;
         }
 
         static void Main(string[] args) {
@@ -118,7 +128,11 @@ namespace Water {
                         speed = speed,
                         wavelength = wavelength,
                         amplitude = amplitude,
-                        waveDir = water.wave.waveDir
+                        waveDir = water.wave.waveDir,
+                        array = new Vector4[count] {
+                            new Vector4(1.0f,1.0f,1.0f,1.0f),
+                            new Vector4(1.0f,1.0f,1.0f,1.0f)
+                        }
                     };
 
                     //update constant buffer

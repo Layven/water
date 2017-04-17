@@ -7,6 +7,7 @@ cbuffer data :register(b0)
 	float wavelength;
 	float amplitude;
 	float4 waveDir;
+	float4 array[2];
 };
 
 struct VS_IN
@@ -42,7 +43,7 @@ PS_IN VS( VS_IN input)
 	pos = mul(worldViewProj,pos);
 
 	output.position = pos;
-	output.color=input.color;
+	output.color=array[0];
 
 	return output;
 }
