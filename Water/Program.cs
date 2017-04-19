@@ -90,6 +90,8 @@ namespace Water {
 
                 //create constant buffer
                 Buffer11 buffer = shader.CreateBuffer<UniformData>();
+                Buffer11 arrayBuffer = shader.CreateBuffer<ArrayData>();
+
 
                 fpsCounter.Reset();
 
@@ -154,6 +156,7 @@ namespace Water {
                     var array = new Vector4[2];
                     array[0] = new Vector4(1.0f,0.0f,0.0f,0.0f);
                     array[1] = new Vector4(1.0f,1.0f,1.0f,0.0f);
+                    water.wave.waveDir = new Vector4((float) Math.Sin(time / 5.0), 0, (float) Math.Cos(time / 5.0), 0);
 
                     UniformData sceneInfo = new UniformData() {
                         worldViewProj = WVP,
@@ -170,10 +173,13 @@ namespace Water {
 
 
                     using (DataStream ds = new DataStream(Utilities.SizeOf<ArrayData>(),true,true)) {
+                        //device.UpdateDataWithDataStream(arrayBuffer,ds);
                         ds.WriteRange(getBytes(arrayInfo));
                         ds.Position = 0;
-                        Buffer11 buff = shader.CreateBuffer<ArrayData>(ds);
-                        device.DeviceContext.VertexShader.SetConstantBuffer(1, buff);
+                        arrayBuffer.Dispose();
+                        arrayBuffer = shader.CreateBuffer<ArrayData>(ds);
+                        //device.UnmapDataStream(arrayBuffer);
+                        
                     }
 
                     //update constant buffer
@@ -182,6 +188,8 @@ namespace Water {
                     //pass constant buffer to shader
                     device.DeviceContext.VertexShader.SetConstantBuffer(0, buffer);
                     device.DeviceContext.PixelShader.SetConstantBuffer(0, buffer);
+                    device.DeviceContext.VertexShader.SetConstantBuffer(1, arrayBuffer);
+
 
                     //draw mesh
                     water.Draw();

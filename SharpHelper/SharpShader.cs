@@ -154,6 +154,16 @@ namespace SharpHelper
             return new Buffer(Device.Device, Utilities.SizeOf<T>(), ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
         }
 
+        public Buffer CreateBuffer<T>(DataStream ds) where T : struct
+        {
+            return new Buffer(Device.Device, ds, Utilities.SizeOf<T>(), ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
+        }
+
+        public Buffer CreateDynamicBuffer<T>() where T : struct
+        {
+            return new Buffer(Device.Device, Utilities.SizeOf<T>(), ResourceUsage.Dynamic, BindFlags.ConstantBuffer, CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
+        }
+
         /// <summary>
         /// Applica lo shader
         /// </summary>

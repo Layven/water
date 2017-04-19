@@ -12,6 +12,7 @@ using SharpDX.Windows;
 //
 using Device11 = SharpDX.Direct3D11.Device;
 using Buffer11 = SharpDX.Direct3D11.Buffer;
+using MapFlags = SharpDX.Direct3D11.MapFlags;
 
 namespace SharpHelper
 {
@@ -330,6 +331,14 @@ namespace SharpHelper
         public void UpdateData<T>(Buffer11 buffer, T data) where T : struct
         {
             DeviceContext.UpdateSubresource(ref data, buffer);
+        }
+
+        public void UpdateDataWithDataStream(Buffer11 buffer, DataStream ds) {
+            DeviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out ds);
+        }
+
+        public void UnmapDataStream(Buffer11 buffer) {
+            DeviceContext.UnmapSubresource(buffer,0);
         }
 
         /// <summary>
