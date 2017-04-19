@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -13,7 +14,7 @@ namespace Water {
     class Program {
 
         private const int count = 2;
-        [StructLayout(LayoutKind.Explicit,Size = 128)]
+        [StructLayout(LayoutKind.Explicit,Size = 112)]
         struct UniformData {
             [FieldOffset(0)]
             public Matrix worldViewProj;
@@ -27,8 +28,23 @@ namespace Water {
             public float amplitude;
             [FieldOffset(80)]
             public Vector4 waveDir;
-            [FieldOffset(96), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
+        }
+
+        [StructLayout(LayoutKind.Explicit,Size = 32)]
+        struct ArrayData {
+            [FieldOffset(0), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
             public Vector4[] array;
+        }
+
+        byte[] getBytes(ArrayData str) {
+            int size = Marshal.SizeOf(str);
+            byte[] arr = new byte[size];
+
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+            Marshal.StructureToPtr(str, ptr, true);
+            Marshal.Copy(ptr, arr, 0, size);
+            Marshal.FreeHGlobal(ptr);
+            return arr;
         }
 
         static void Main(string[] args) {
@@ -121,6 +137,9 @@ namespace Water {
                     float speed = water.wave.speed;
                     float wavelength = water.wave.wavelenght;
                     float amplitude = water.wave.amplitude;
+                    var array = new Vector4[2];
+                    array[0] = new Vector4(1.0f,1.0f,0.0f,0.0f);
+                    array[1] = new Vector4(1.0f,1.0f,1.0f,0.0f);
 
                     UniformData sceneInfo = new UniformData() {
                         worldViewProj = WVP,
@@ -129,17 +148,22 @@ namespace Water {
                         wavelength = wavelength,
                         amplitude = amplitude,
                         waveDir = water.wave.waveDir,
-                        array = new Vector4[count] {
-                            new Vector4(1.0f,1.0f,1.0f,1.0f),
-                            new Vector4(1.0f,1.0f,1.0f,1.0f)
-                        }
                     };
+
+
+                    using (DataStream ds = new DataStream(Utilities.SizeOf<ArrayData>(),true,true)) {
+                        ds.WriteRange(array);
+                        ds.Position = 0;
+                        Buffer11 buff = shader.CreateBuffer<ArrayData>(ds);
+                        device.DeviceContext.VertexShader.SetConstantBuffer(1, buff);
+                    }
 
                     //update constant buffer
                     device.UpdateData<UniformData>(buffer, sceneInfo);
 
                     //pass constant buffer to shader
                     device.DeviceContext.VertexShader.SetConstantBuffer(0, buffer);
+                    device.DeviceContext.PixelShader.SetConstantBuffer(0, buffer);
 
                     //draw mesh
                     water.Draw();

@@ -7,6 +7,10 @@ cbuffer data :register(b0)
 	float wavelength;
 	float amplitude;
 	float4 waveDir;
+};
+
+cbuffer data :register(b1)
+{
 	float4 array[2];
 };
 
