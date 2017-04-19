@@ -36,7 +36,7 @@ namespace Water {
             public Vector4[] array;
         }
 
-        byte[] getBytes(ArrayData str) {
+        static byte[] getBytes(ArrayData str) {
             int size = Marshal.SizeOf(str);
             byte[] arr = new byte[size];
 
@@ -45,6 +45,20 @@ namespace Water {
             Marshal.Copy(ptr, arr, 0, size);
             Marshal.FreeHGlobal(ptr);
             return arr;
+        }
+
+        static ArrayData fromBytes(byte[] arr) {
+            ArrayData str = new ArrayData();
+
+            int size = Marshal.SizeOf(str);
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+
+            Marshal.Copy(arr, 0, ptr, size);
+
+            str = (ArrayData) Marshal.PtrToStructure(ptr, str.GetType());
+            Marshal.FreeHGlobal(ptr);
+
+            return str;
         }
 
         static void Main(string[] args) {
@@ -138,7 +152,7 @@ namespace Water {
                     float wavelength = water.wave.wavelenght;
                     float amplitude = water.wave.amplitude;
                     var array = new Vector4[2];
-                    array[0] = new Vector4(1.0f,1.0f,0.0f,0.0f);
+                    array[0] = new Vector4(1.0f,0.0f,0.0f,0.0f);
                     array[1] = new Vector4(1.0f,1.0f,1.0f,0.0f);
 
                     UniformData sceneInfo = new UniformData() {
@@ -150,9 +164,13 @@ namespace Water {
                         waveDir = water.wave.waveDir,
                     };
 
+                    ArrayData arrayInfo = new ArrayData() {
+                        array = array
+                    };
+
 
                     using (DataStream ds = new DataStream(Utilities.SizeOf<ArrayData>(),true,true)) {
-                        ds.WriteRange(array);
+                        ds.WriteRange(getBytes(arrayInfo));
                         ds.Position = 0;
                         Buffer11 buff = shader.CreateBuffer<ArrayData>(ds);
                         device.DeviceContext.VertexShader.SetConstantBuffer(1, buff);
