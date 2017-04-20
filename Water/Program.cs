@@ -35,9 +35,13 @@ namespace Water {
             public float wavelength;
             [FieldOffset(2*16*count+8)]
             public float amplitude;
-            
+            [FieldOffset(2*16*count+12)]
+            public float dummy;
+
             [FieldOffset(2*16*count+16), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
             public float[] speedX;
+            [FieldOffset(2*16*count+16+12)]
+            public float dummy2;
 
         }
 
@@ -156,9 +160,9 @@ namespace Water {
 
                     float time = Environment.TickCount / 1000.0F;
                     float[] speed = new float[count] {
+                        water.wave.speed*5.0f,
+                        water.wave.speed*5.0f,
                         water.wave.speed,
-                        water.wave.speed*10.0f,
-                        water.wave.speed*10.0f,
                     };
                     float[] wavelength = new float[count] {
                         water.wave.wavelength,

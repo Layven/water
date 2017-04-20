@@ -47,8 +47,8 @@ PS_IN VS( VS_IN input)
 	PS_IN output = (PS_IN)0;
 	
 	float4 pos = input.position;
-	pos += calculateOffset(pos,0);
-	//pos += calculateOffset(pos,1);
+	//pos += calculateOffset(pos,0);
+	pos += calculateOffset(pos,1);
 	//pos += calculateOffset(pos,2);
 	pos = mul(worldViewProj,pos);
 	output.position = pos;
