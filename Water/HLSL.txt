@@ -4,15 +4,15 @@ cbuffer data :register(b0)
 {
 	float4x4 worldViewProj;
 	float time;
+	float speed;
+	float wavelength;
+	float amplitude;
 };
 
 cbuffer data :register(b1)
 {
 	float4 array[count];
 	float4 waveDir[count];
-	float speed;
-	float wavelength;
-	float amplitude;
 	float speedX[count];
 };
 
@@ -32,7 +32,7 @@ float4 calculateOffset(float4 pos, int i) {
 	float4 offset = float4(0,0,0,0);
 
 	float dist = dot(pos,waveDir[i]);
-	float phase = (dist + speedX[i]*time)/wavelength;
+	float phase = (dist + speed*time)/wavelength;
 
 	float offsetX = amplitude*-cos(phase);
 	float offsetY = amplitude*-sin(phase);
@@ -47,9 +47,9 @@ PS_IN VS( VS_IN input)
 	PS_IN output = (PS_IN)0;
 	
 	float4 pos = input.position;
-	//pos += calculateOffset(pos,0);
+	pos += calculateOffset(pos,0);
 	pos += calculateOffset(pos,1);
-	//pos += calculateOffset(pos,2);
+	pos += calculateOffset(pos,2);
 	pos = mul(worldViewProj,pos);
 	output.position = pos;
 

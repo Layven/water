@@ -20,7 +20,12 @@ namespace Water {
             public Matrix worldViewProj;
             [FieldOffset(64)]
             public float time;
-
+            [FieldOffset(68)]
+            public float speed;
+            [FieldOffset(72)]
+            public float wavelength;
+            [FieldOffset(76)]
+            public float amplitude;
         }
 
         [StructLayout(LayoutKind.Explicit,Size = 2*16*count+16+16)]
@@ -29,19 +34,9 @@ namespace Water {
             public Vector4[] array;
             [FieldOffset(16*count), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
             public Vector4[] waveDir;
-            [FieldOffset(2*16*count)]
-            public float speed;
-            [FieldOffset(2*16*count+4)]
-            public float wavelength;
-            [FieldOffset(2*16*count+8)]
-            public float amplitude;
-            [FieldOffset(2*16*count+12)]
-            public float dummy;
 
             [FieldOffset(2*16*count+16), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
             public float[] speedX;
-            [FieldOffset(2*16*count+16+12)]
-            public float dummy2;
 
         }
 
@@ -194,14 +189,14 @@ namespace Water {
                     UniformData sceneInfo = new UniformData() {
                         worldViewProj = WVP,
                         time = time,
+                        speed = water.wave.speed,
+                        wavelength = water.wave.wavelength,
+                        amplitude = water.wave.amplitude,
                     };
 
                     ArrayData arrayInfo = new ArrayData() {
                         array = array,
                         waveDir = waveDir,
-                        speed = water.wave.speed,
-                        wavelength = water.wave.wavelength,
-                        amplitude = water.wave.amplitude,
                         speedX = speed,
                     };
 
