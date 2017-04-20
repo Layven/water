@@ -13,27 +13,32 @@ using Buffer11 = SharpDX.Direct3D11.Buffer;
 namespace Water {
     class Program {
 
-        private const int count = 2;
-        [StructLayout(LayoutKind.Explicit,Size = 112)]
+        private const int count = 3;
+        [StructLayout(LayoutKind.Explicit,Size = 80)]
         struct UniformData {
             [FieldOffset(0)]
             public Matrix worldViewProj;
             [FieldOffset(64)]
             public float time;
-            [FieldOffset(68)]
-            public float speed;
-            [FieldOffset(72)]
-            public float wavelength;
-            [FieldOffset(76)]
-            public float amplitude;
-            [FieldOffset(80)]
-            public Vector4 waveDir;
+
         }
 
-        [StructLayout(LayoutKind.Explicit,Size = 32)]
+        [StructLayout(LayoutKind.Explicit,Size = 2*16*count+16+16)]
         struct ArrayData {
             [FieldOffset(0), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
             public Vector4[] array;
+            [FieldOffset(16*count), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
+            public Vector4[] waveDir;
+            [FieldOffset(2*16*count)]
+            public float speed;
+            [FieldOffset(2*16*count+4)]
+            public float wavelength;
+            [FieldOffset(2*16*count+8)]
+            public float amplitude;
+            
+            [FieldOffset(2*16*count+16), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
+            public float[] speedX;
+
         }
 
         static byte[] getBytes(ArrayData str) {
@@ -150,25 +155,50 @@ namespace Water {
 
 
                     float time = Environment.TickCount / 1000.0F;
-                    float speed = water.wave.speed;
-                    float wavelength = water.wave.wavelenght;
-                    float amplitude = water.wave.amplitude;
-                    var array = new Vector4[2];
-                    array[0] = new Vector4(1.0f,0.0f,0.0f,0.0f);
-                    array[1] = new Vector4(1.0f,1.0f,1.0f,0.0f);
-                    water.wave.waveDir = new Vector4((float) Math.Sin(time / 5.0), 0, (float) Math.Cos(time / 5.0), 0);
+                    float[] speed = new float[count] {
+                        water.wave.speed,
+                        water.wave.speed*10.0f,
+                        water.wave.speed*10.0f,
+                    };
+                    float[] wavelength = new float[count] {
+                        water.wave.wavelength,
+                        water.wave.wavelength,
+                        water.wave.wavelength,
+                    };
+                    float[] amplitude = new float[count] {
+                        water.wave.amplitude,
+                        water.wave.amplitude,
+                        water.wave.amplitude,
+                    };
+                    Vector4 tmp = new Vector4(2.0f,0.0f,-2.0f,0.0f);
+                    tmp.Normalize();
+
+                    Vector4[] waveDir = new Vector4[count] {
+                        water.wave.waveDir,
+                        new Vector4(water.wave.waveDir.Z, 0, -water.wave.waveDir.X, 0),
+                        tmp,
+                    };
+
+                    var array = new Vector4[count] {
+                        new Vector4(1.0f,0.0f,0.0f,0.0f),
+                        new Vector4(1.0f,1.0f,1.0f,0.0f),
+                        new Vector4(1.0f,1.0f,1.0f,0.0f),
+                    };
+
+                    //water.wave.waveDir = new Vector4((float) Math.Sin(time / 5.0), 0, (float) Math.Cos(time / 5.0), 0);
 
                     UniformData sceneInfo = new UniformData() {
                         worldViewProj = WVP,
                         time = time,
-                        speed = speed,
-                        wavelength = wavelength,
-                        amplitude = amplitude,
-                        waveDir = water.wave.waveDir,
                     };
 
                     ArrayData arrayInfo = new ArrayData() {
-                        array = array
+                        array = array,
+                        waveDir = waveDir,
+                        speed = water.wave.speed,
+                        wavelength = water.wave.wavelength,
+                        amplitude = water.wave.amplitude,
+                        speedX = speed,
                     };
 
 

@@ -18,7 +18,7 @@ namespace Water {
         private Vector3 botLeftCorner = new Vector3(-10.0f, -2.0f, -6.0f);
         private float size = 20;
 
-        public Wave wave = new Wave(2.0f,1.0f);
+        public Wave wave = new Wave(2.0f,0.7f);
 
         //Vertices
         private ColoredVertex[] vertices;
@@ -72,16 +72,16 @@ namespace Water {
 
     public class Wave {
         public float speed;
-        public float wavelenght;
+        public float wavelength;
         public float amplitude;
         public Vector4 waveDir;
         public float gravity = 9.81f;
 
         public Wave(float wavelength, float amplitude) {
-            this.wavelenght = wavelength;
+            this.wavelength = wavelength;
             this.amplitude = amplitude;
             speed = (float) Math.Sqrt(gravity*wavelength/(2.0*Math.PI));
-            waveDir = new Vector4(2.0f,0.0f,-1.0f, 0.0f);
+            waveDir = new Vector4(2.0f,0.0f,-0.0f, 0.0f);
             waveDir.Normalize();
         }
 

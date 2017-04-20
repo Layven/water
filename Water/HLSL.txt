@@ -1,17 +1,19 @@
-﻿
+﻿#define count 3
+
 cbuffer data :register(b0)
 {
 	float4x4 worldViewProj;
 	float time;
-	float speed;
-	float wavelength;
-	float amplitude;
-	float4 waveDir;
 };
 
 cbuffer data :register(b1)
 {
-	float4 array[2];
+	float4 array[count];
+	float4 waveDir[count];
+	float speed;
+	float wavelength;
+	float amplitude;
+	float speedX[count];
 };
 
 struct VS_IN
@@ -26,28 +28,32 @@ struct PS_IN
 	float4 color : COLOR;
 };
 
-PS_IN VS( VS_IN input)
-{
-	PS_IN output = (PS_IN)0;
+float4 calculateOffset(float4 pos, int i) {
+	float4 offset = float4(0,0,0,0);
 
-	float4 pos = input.position;
-	
-	float dist = dot(pos,waveDir);
-	//float dist = pos.x;
-	float phase = (dist + speed*time)/wavelength;
-
-	//pos.y = pos.y + amplitude*sin(phase);
+	float dist = dot(pos,waveDir[i]);
+	float phase = (dist + speedX[i]*time)/wavelength;
 
 	float offsetX = amplitude*-cos(phase);
 	float offsetY = amplitude*-sin(phase);
 
-	pos += offsetX*waveDir;
-	pos += float4(0, offsetY, 0 ,0);
-	
-	pos = mul(worldViewProj,pos);
+	offset = offsetX*waveDir[i] + float4(0, offsetY, 0, 0);
 
+	return offset;
+}
+
+PS_IN VS( VS_IN input)
+{
+	PS_IN output = (PS_IN)0;
+	
+	float4 pos = input.position;
+	pos += calculateOffset(pos,0);
+	//pos += calculateOffset(pos,1);
+	//pos += calculateOffset(pos,2);
+	pos = mul(worldViewProj,pos);
 	output.position = pos;
-	output.color=array[0];
+
+	output.color=input.color;
 
 	return output;
 }
