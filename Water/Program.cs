@@ -14,29 +14,25 @@ namespace Water {
     class Program {
 
         private const int count = 3;
-        [StructLayout(LayoutKind.Explicit,Size = 80)]
+        [StructLayout(LayoutKind.Explicit,Size = 144)]
         struct UniformData {
             [FieldOffset(0)]
             public Matrix worldViewProj;
             [FieldOffset(64)]
+            public Matrix worldView;
+            [FieldOffset(128)]
             public float time;
-            [FieldOffset(68)]
-            public float speed;
-            [FieldOffset(72)]
-            public float wavelength;
-            [FieldOffset(76)]
-            public float amplitude;
         }
 
-        [StructLayout(LayoutKind.Explicit,Size = 2*16*count+16+16)]
+        [StructLayout(LayoutKind.Explicit,Size = 3*16*count)]
         struct ArrayData {
             [FieldOffset(0), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
             public Vector4[] array;
             [FieldOffset(16*count), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
             public Vector4[] waveDir;
 
-            [FieldOffset(2*16*count+16), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
-            public float[] speedX;
+            [FieldOffset(2*16*count), MarshalAs(UnmanagedType.ByValArray, SizeConst = count)]
+            public Vector4[] waveStats;
 
         }
 
@@ -150,25 +146,15 @@ namespace Water {
                     Matrix view = Matrix.LookAtLH(new Vector3(0, 12, -12), new Vector3(), Vector3.UnitY);
                     Matrix world = Matrix.RotationY(Environment.TickCount / 1000.0F * 0.1f);
                     world = Matrix.Identity;
-                    Matrix WVP = world * view * projection;
 
 
                     float time = Environment.TickCount / 1000.0F;
-                    float[] speed = new float[count] {
-                        water.wave.speed*5.0f,
-                        water.wave.speed*5.0f,
-                        water.wave.speed,
+                    Vector4[] waveStats = new Vector4[count] {
+                        new Vector4(water.wave.speed*1.0f,water.wave.wavelength*1.0f,water.wave.amplitude*1.0f,0),
+                        new Vector4(water.wave.speed*1.0f,water.wave.wavelength*1.0f,water.wave.amplitude*1.0f,0),
+                        new Vector4(water.wave.speed*1.0f,water.wave.wavelength*1.0f,water.wave.amplitude*1.0f,0),
                     };
-                    float[] wavelength = new float[count] {
-                        water.wave.wavelength,
-                        water.wave.wavelength,
-                        water.wave.wavelength,
-                    };
-                    float[] amplitude = new float[count] {
-                        water.wave.amplitude,
-                        water.wave.amplitude,
-                        water.wave.amplitude,
-                    };
+
                     Vector4 tmp = new Vector4(2.0f,0.0f,-2.0f,0.0f);
                     tmp.Normalize();
 
@@ -184,20 +170,18 @@ namespace Water {
                         new Vector4(1.0f,1.0f,1.0f,0.0f),
                     };
 
-                    //water.wave.waveDir = new Vector4((float) Math.Sin(time / 5.0), 0, (float) Math.Cos(time / 5.0), 0);
+                    water.wave.waveDir = new Vector4((float) Math.Sin(time / 5.0), 0, (float) Math.Cos(time / 5.0), 0);
 
                     UniformData sceneInfo = new UniformData() {
-                        worldViewProj = WVP,
+                        worldViewProj = world * view * projection,
+                        worldView = world * view,
                         time = time,
-                        speed = water.wave.speed,
-                        wavelength = water.wave.wavelength,
-                        amplitude = water.wave.amplitude,
                     };
 
                     ArrayData arrayInfo = new ArrayData() {
                         array = array,
                         waveDir = waveDir,
-                        speedX = speed,
+                        waveStats = waveStats,
                     };
 
 

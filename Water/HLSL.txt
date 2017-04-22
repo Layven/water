@@ -3,17 +3,15 @@
 cbuffer data :register(b0)
 {
 	float4x4 worldViewProj;
+	float4x4 worldView;
 	float time;
-	float speed;
-	float wavelength;
-	float amplitude;
 };
 
 cbuffer data :register(b1)
 {
 	float4 array[count];
 	float4 waveDir[count];
-	float speedX[count];
+	float4 waveStats[count];	//float4(speed,wavelength,amplitude,0)
 };
 
 struct VS_IN
@@ -26,10 +24,17 @@ struct PS_IN
 {
 	float4 position : SV_POSITION;
 	float4 color : COLOR;
+	float3 lightDir : LIGHTDIR;
+	float3 normal : NORMAL;
+	float3 viewDir : VIEW;
 };
 
 float4 calculateOffset(float4 pos, int i) {
 	float4 offset = float4(0,0,0,0);
+
+	float speed = waveStats[i].x;
+	float wavelength = waveStats[i].y; 
+	float amplitude = waveStats[i].z;
 
 	float dist = dot(pos,waveDir[i]);
 	float phase = (dist + speed*time)/wavelength;
@@ -47,18 +52,41 @@ PS_IN VS( VS_IN input)
 	PS_IN output = (PS_IN)0;
 	
 	float4 pos = input.position;
-	pos += calculateOffset(pos,0);
-	pos += calculateOffset(pos,1);
-	pos += calculateOffset(pos,2);
-	pos = mul(worldViewProj,pos);
-	output.position = pos;
+	float4 normal = float4(0,0,0,0);
 
+	
+	for(int i = 0; i < 3; i++){
+		float4 offset = calculateOffset(pos,i);
+		pos += offset;
+		normal += normalize(offset);
+	}
+	normal.y = 1; 
+
+	output.position = mul(worldViewProj,pos);
 	output.color=input.color;
 
+	output.lightDir = float3(1,2,0);
+	output.viewDir = mul(worldView, pos).xyz;
+	output.normal = normal.xyz;
+	
 	return output;
 }
 
 float4 PS( PS_IN input ) : SV_Target
 {
-	return input.color;
+	float3 normal = normalize(input.normal);
+	float3 lightDir = normalize(input.lightDir);
+	float3 viewDir = normalize(input.viewDir);
+
+	float3 halfway = normalize(viewDir + lightDir);
+	float costheta = max(dot(normal, lightDir),0);
+	float cosdelta = max(dot(normal, halfway),0);
+
+	float3 ks = float3(1,1,1);
+	float3 kd = float3(0,0,1);
+
+	float3 color = kd*costheta + ks * pow(cosdelta, 50);
+
+	return float4(color,1);
+	//return input.color;
 }
